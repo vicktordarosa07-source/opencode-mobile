@@ -1,5 +1,5 @@
 import { Component, Show, createSignal, onMount } from "solid-js";
-import { Router, Route, Routes } from "@solidjs/router";
+import { Router, Route } from "@solidjs/router";
 import { HomeScreen } from "./screens/HomeScreen";
 import { EditorScreen } from "./screens/EditorScreen";
 import { TerminalScreen } from "./screens/TerminalScreen";
@@ -13,7 +13,6 @@ const AppInner: Component = () => {
   const [, actions] = useAppStore();
 
   onMount(() => {
-    // Initialize app
     actions.init();
     setReady(true);
   });
@@ -22,15 +21,13 @@ const AppInner: Component = () => {
     <Router>
       <div class="app-container">
         <Show when={ready()} fallback={<LoadingScreen />}>
-          <Routes>
-            <Route path="/" component={HomeScreen} />
-            <Route path="/editor" component={EditorScreen} />
-            <Route path="/editor/:path*" component={EditorScreen} />
-            <Route path="/terminal" component={TerminalScreen} />
-            <Route path="/chat" component={ChatScreen} />
-            <Route path="/chat/:sessionId" component={ChatScreen} />
-            <Route path="/settings" component={SettingsScreen} />
-          </Routes>
+          <Route path="/" component={HomeScreen} />
+          <Route path="/editor" component={EditorScreen} />
+          <Route path="/editor/:path*" component={EditorScreen} />
+          <Route path="/terminal" component={TerminalScreen} />
+          <Route path="/chat" component={ChatScreen} />
+          <Route path="/chat/:sessionId" component={ChatScreen} />
+          <Route path="/settings" component={SettingsScreen} />
           <TabBar />
         </Show>
       </div>
