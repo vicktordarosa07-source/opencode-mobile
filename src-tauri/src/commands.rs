@@ -1,7 +1,6 @@
 use serde::{Deserialize, Serialize};
 use tauri::State;
 use crate::db::Database;
-use crate::auth::AuthState;
 
 // ============ Server Commands ============
 

@@ -1,16 +1,16 @@
-import { Component, onMount, onCleanup, createSignal, Show } from "solid-js";
+import { Component, onMount, createSignal, Show } from "solid-js";
 import { useAppStore } from "../stores/appStore";
 
 export const TerminalScreen: Component = () => {
-  const { terminal, createTerminal, writeToTerminal, currentProject } = useAppStore();
+  const [state, actions] = useAppStore();
   const [input, setInput] = createSignal("");
   const [history, setHistory] = createSignal<string[]>([]);
   const [historyIndex, setHistoryIndex] = createSignal(-1);
   let terminalRef: HTMLDivElement | undefined;
 
   onMount(async () => {
-    if (!terminal.id) {
-      await createTerminal();
+    if (!state.terminal.id) {
+      await actions.createTerminal();
     }
   });
 
@@ -23,7 +23,7 @@ export const TerminalScreen: Component = () => {
     setHistoryIndex(-1);
 
     // Send to terminal
-    await writeToTerminal(cmd + "\n");
+    await actions.writeToTerminal(cmd + "\n");
 
     // Clear input
     setInput("");
@@ -61,13 +61,13 @@ export const TerminalScreen: Component = () => {
     <div class="screen terminal-screen">
       <header class="screen-header">
         <div class="header-title">
-          <span class="terminal-icon">⬛</span>
+          <span class="terminal-icon">&#x2B1B;</span>
           <span>Terminal</span>
-          <Show when={currentProject()}>
-            <span class="terminal-cwd">{currentProject()!.name}</span>
+          <Show when={state.currentProject}>
+            <span class="terminal-cwd">{state.currentProject!.name}</span>
           </Show>
         </div>
-        <button class="icon-button" onClick={() => createTerminal()}>
+        <button class="icon-button" onClick={() => actions.createTerminal()}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="12" y1="5" x2="12" y2="19" />
             <line x1="5" y1="12" x2="19" y2="12" />
@@ -77,7 +77,7 @@ export const TerminalScreen: Component = () => {
 
       {/* Terminal Output */}
       <div class="terminal-output" ref={terminalRef}>
-        <Show when={terminal.id}>
+        <Show when={state.terminal.id}>
           <div class="terminal-welcome">
             <pre class="ascii-art">{`
    ___  ______  _____
@@ -89,7 +89,7 @@ export const TerminalScreen: Component = () => {
             <p class="terminal-hint">Type commands below. Use quick actions for common tasks.</p>
           </div>
         </Show>
-        <Show when={!terminal.id}>
+        <Show when={!state.terminal.id}>
           <div class="terminal-loading">
             <p>Starting terminal...</p>
           </div>
@@ -103,7 +103,7 @@ export const TerminalScreen: Component = () => {
             class="quick-command"
             onClick={async () => {
               setHistory((h) => [...h, qc.cmd]);
-              await writeToTerminal(qc.cmd + "\n");
+              await actions.writeToTerminal(qc.cmd + "\n");
             }}
           >
             {qc.label}

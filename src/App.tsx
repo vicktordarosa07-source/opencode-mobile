@@ -6,15 +6,15 @@ import { TerminalScreen } from "./screens/TerminalScreen";
 import { ChatScreen } from "./screens/ChatScreen";
 import { SettingsScreen } from "./screens/SettingsScreen";
 import { TabBar } from "./components/TabBar";
-import { useAppStore } from "./stores/appStore";
+import { StoreProvider, useAppStore } from "./stores/appStore";
 
-const App: Component = () => {
+const AppInner: Component = () => {
   const [ready, setReady] = createSignal(false);
-  const store = useAppStore();
+  const [, actions] = useAppStore();
 
   onMount(() => {
     // Initialize app
-    store.init();
+    actions.init();
     setReady(true);
   });
 
@@ -37,6 +37,12 @@ const App: Component = () => {
     </Router>
   );
 };
+
+const App: Component = () => (
+  <StoreProvider>
+    <AppInner />
+  </StoreProvider>
+);
 
 const LoadingScreen: Component = () => (
   <div class="loading-screen">

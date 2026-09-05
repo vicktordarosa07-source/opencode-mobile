@@ -1,4 +1,5 @@
 /* OpenCode Mobile - Global Styles */
+@import "./screens.css";
 
 :root {
   /* Colors - Dark Theme */
@@ -190,5 +191,3 @@ input, textarea {
   white-space: nowrap;
   border-width: 0;
 }
-
-@import "./screens.css";

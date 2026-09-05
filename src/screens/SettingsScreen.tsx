@@ -2,7 +2,7 @@ import { Component, For, Show, createSignal } from "solid-js";
 import { useAppStore } from "../stores/appStore";
 
 export const SettingsScreen: Component = () => {
-  const { providers, currentProvider, setProvider, loggedIn, username, serverUrl, login, logout, serverRunning, startServer, stopServer } = useAppStore();
+  const [state, actions] = useAppStore();
   const [showAddProvider, setShowAddProvider] = createSignal(false);
   const [showLogin, setShowLogin] = createSignal(false);
   const [serverUrlInput, setServerUrlInput] = createSignal("");
@@ -13,7 +13,7 @@ export const SettingsScreen: Component = () => {
   const handleAddProvider = async () => {
     const p = newProvider();
     if (!p.name) return;
-    await setProvider({
+    await actions.setProvider({
       id: Date.now().toString(),
       name: p.name,
       api_key: p.api_key || null,
@@ -26,7 +26,7 @@ export const SettingsScreen: Component = () => {
 
   const handleLogin = async () => {
     if (!serverUrlInput() || !apiKeyInput()) return;
-    await login(serverUrlInput(), apiKeyInput(), usernameInput() || "user");
+    await actions.login(serverUrlInput(), apiKeyInput(), usernameInput() || "user");
     setShowLogin(false);
   };
 
@@ -45,14 +45,14 @@ export const SettingsScreen: Component = () => {
               <div class="setting-info">
                 <span class="setting-label">Status</span>
                 <span class="setting-value">
-                  {serverRunning() ? "Running" : "Stopped"}
+                  {state.serverRunning ? "Running" : "Stopped"}
                 </span>
               </div>
               <button
-                class={`toggle-button ${serverRunning() ? "active" : ""}`}
-                onClick={() => (serverRunning() ? stopServer() : startServer())}
+                class={`toggle-button ${state.serverRunning ? "active" : ""}`}
+                onClick={() => (state.serverRunning ? actions.stopServer() : actions.startServer())}
               >
-                {serverRunning() ? "Stop" : "Start"}
+                {state.serverRunning ? "Stop" : "Start"}
               </button>
             </div>
           </div>
@@ -62,18 +62,18 @@ export const SettingsScreen: Component = () => {
         <section class="settings-section">
           <h2 class="section-title">Account</h2>
           <div class="settings-card">
-            <Show when={loggedIn()}>
+            <Show when={state.loggedIn}>
               <div class="setting-row">
                 <div class="setting-info">
                   <span class="setting-label">Logged in as</span>
-                  <span class="setting-value">{username()}</span>
+                  <span class="setting-value">{state.username}</span>
                 </div>
-                <button class="secondary-button" onClick={logout}>
+                <button class="secondary-button" onClick={() => actions.logout()}>
                   Logout
                 </button>
               </div>
             </Show>
-            <Show when={!loggedIn()}>
+            <Show when={!state.loggedIn}>
               <div class="setting-row">
                 <div class="setting-info">
                   <span class="setting-label">Not logged in</span>
@@ -96,8 +96,8 @@ export const SettingsScreen: Component = () => {
             </button>
           </div>
           <div class="settings-card">
-            <Show when={providers().length > 0}>
-              <For each={providers()}>
+            <Show when={state.providers.length > 0}>
+              <For each={state.providers}>
                 {(provider) => (
                   <div class="setting-row">
                     <div class="setting-info">
@@ -106,14 +106,14 @@ export const SettingsScreen: Component = () => {
                         {provider.model || "Default model"}
                       </span>
                     </div>
-                    <Show when={currentProvider()?.id === provider.id}>
+                    <Show when={state.currentProvider?.id === provider.id}>
                       <span class="active-badge">Active</span>
                     </Show>
                   </div>
                 )}
               </For>
             </Show>
-            <Show when={providers().length === 0}>
+            <Show when={state.providers.length === 0}>
               <div class="empty-state-small">
                 <p>No providers configured</p>
               </div>

@@ -20,8 +20,7 @@
     "@tauri-apps/plugin-clipboard-manager": "^2.2.0",
     "@tauri-apps/plugin-opener": "^2.2.0",
     "@tauri-apps/plugin-process": "^2.2.0",
-    "solid-js": "^1.9.5",
-    "zustand": "^5.0.0"
+    "solid-js": "^1.9.5"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2.11.0",

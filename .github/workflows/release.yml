@@ -1,20 +1,20 @@
-name: Build Android APK
+name: Release Android
 
 on:
   push:
-    branches: [main, develop]
-  workflow_dispatch:
+    tags:
+      - "v*"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 env:
   CARGO_TERM_COLOR: always
   ANDROID_NDK_VERSION: "27.3.13750724"
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
@@ -74,7 +74,7 @@ jobs:
         with:
           name: opencode-mobile-apk
           path: src-tauri/gen/android/app/build/outputs/apk/**/*.apk
-          retention-days: 30
+          retention-days: 90
 
       - name: Upload AAB
         uses: actions/upload-artifact@v4
@@ -82,4 +82,46 @@ jobs:
         with:
           name: opencode-mobile-aab
           path: src-tauri/gen/android/app/build/outputs/bundle/**/*.aab
-          retention-days: 30
+          retention-days: 90
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download APK
+        uses: actions/download-artifact@v4
+        with:
+          name: opencode-mobile-apk
+          path: ./release
+
+      - name: Download AAB
+        uses: actions/download-artifact@v4
+        with:
+          name: opencode-mobile-aab
+          path: ./release
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: "OpenCode Mobile ${{ github.ref_name }}"
+          body: |
+            ## OpenCode Mobile ${{ github.ref_name }}
+
+            Built from commit ${{ github.sha }}
+
+            ### Installation
+            1. Download the APK below
+            2. Enable "Install from unknown sources" on your Android device
+            3. Open the APK file to install
+
+            ### Play Store
+            Use the AAB file for Play Store submission.
+          files: |
+            ./release/**/*.apk
+            ./release/**/*.aab
+          draft: false
+          prerelease: ${{ contains(github.ref_name, 'beta') || contains(github.ref_name, 'rc') }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

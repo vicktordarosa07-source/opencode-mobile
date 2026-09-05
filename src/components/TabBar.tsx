@@ -2,7 +2,7 @@ import { Component } from "solid-js";
 import { useAppStore } from "../stores/appStore";
 
 export const TabBar: Component = () => {
-  const { currentTab, setTab } = useAppStore();
+  const [state, { setTab }] = useAppStore();
 
   const tabs = [
     { id: "home" as const, icon: "home", label: "Home" },
@@ -16,7 +16,7 @@ export const TabBar: Component = () => {
     <nav class="tab-bar">
       {tabs.map((tab) => (
         <button
-          class={`tab-item ${currentTab() === tab.id ? "active" : ""}`}
+          class={`tab-item ${state.currentTab === tab.id ? "active" : ""}`}
           onClick={() => setTab(tab.id)}
           aria-label={tab.label}
         >

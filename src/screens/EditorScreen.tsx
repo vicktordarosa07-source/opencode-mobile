@@ -1,26 +1,26 @@
-import { Component, For, Show, createSignal, onMount, createEffect } from "solid-js";
+import { Component, For, Show, createSignal, onMount } from "solid-js";
 import { useAppStore } from "../stores/appStore";
 
 export const EditorScreen: Component = () => {
-  const { files, selectedFile, editorContent, setEditorContent, saveFile, loadDirectory, currentPath, editorDirty, currentProject } = useAppStore();
+  const [state, actions] = useAppStore();
   const [showFileTree, setShowFileTree] = createSignal(true);
   const [fontSize, setFontSize] = createSignal(14);
   const [lineNumbers, setLineNumbers] = createSignal(true);
 
   onMount(() => {
-    if (currentProject()) {
-      loadDirectory(currentProject()!.path);
+    if (state.currentProject) {
+      actions.loadDirectory(state.currentProject.path);
     }
   });
 
   const handleSave = async () => {
-    if (editorContent()) {
-      await saveFile(editorContent());
+    if (state.editorContent) {
+      await actions.saveFile(state.editorContent);
     }
   };
 
   const lineCount = () => {
-    const content = editorContent() || "";
+    const content = state.editorContent || "";
     return content.split("\n").length;
   };
 
@@ -35,17 +35,17 @@ export const EditorScreen: Component = () => {
           </svg>
         </button>
         <div class="header-title">
-          <Show when={selectedFile()}>
-            <span class="file-name">{selectedFile()!.name}</span>
-            <Show when={editorDirty()}>
-              <span class="dirty-dot">●</span>
+          <Show when={state.selectedFile}>
+            <span class="file-name">{state.selectedFile!.name}</span>
+            <Show when={state.editorDirty}>
+              <span class="dirty-dot">&#x25CF;</span>
             </Show>
           </Show>
-          <Show when={!selectedFile()}>
+          <Show when={!state.selectedFile}>
             <span class="file-name">No file selected</span>
           </Show>
         </div>
-        <button class="icon-button" onClick={handleSave} disabled={!editorDirty()}>
+        <button class="icon-button" onClick={handleSave} disabled={!state.editorDirty}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z" />
             <polyline points="17 21 17 13 7 13 7 21" />
@@ -68,21 +68,21 @@ export const EditorScreen: Component = () => {
               </button>
             </div>
             <div class="file-tree-list">
-              <For each={files}>
+              <For each={state.files}>
                 {(file) => (
                   <div
                     class={`file-tree-item ${file.is_dir ? "directory" : "file"}`}
-                    style={{ "padding-left": `${(file.path.split(currentPath).length - 1) * 16 + 8}px` }}
+                    style={{ "padding-left": `${(file.path.split(state.currentPath).length - 1) * 16 + 8}px` }}
                     onClick={() => {
                       if (file.is_dir) {
-                        loadDirectory(file.path);
+                        actions.loadDirectory(file.path);
                       } else {
-                        useAppStore.getState().selectFile(file);
+                        actions.selectFile(file);
                       }
                     }}
                   >
                     <span class="file-icon">
-                      {file.is_dir ? "📁" : getFileIcon(file.name)}
+                      {file.is_dir ? "\u{1F4C1}" : getFileIcon(file.name)}
                     </span>
                     <span class="file-name">{file.name}</span>
                   </div>
@@ -94,7 +94,7 @@ export const EditorScreen: Component = () => {
 
         {/* Editor */}
         <div class="editor-area">
-          <Show when={selectedFile()}>
+          <Show when={state.selectedFile}>
             <div class="editor-settings">
               <button
                 class={`icon-button-sm ${fontSize() > 14 ? "active" : ""}`}
@@ -127,8 +127,8 @@ export const EditorScreen: Component = () => {
               </Show>
               <textarea
                 class="editor-textarea"
-                value={editorContent()}
-                onInput={(e) => setEditorContent(e.currentTarget.value)}
+                value={state.editorContent}
+                onInput={(e) => actions.setEditorContent(e.currentTarget.value)}
                 style={{
                   "font-size": `${fontSize()}px`,
                   "line-height": `${fontSize() * 1.5}px`,
@@ -137,9 +137,9 @@ export const EditorScreen: Component = () => {
               />
             </div>
           </Show>
-          <Show when={!selectedFile()}>
+          <Show when={!state.selectedFile}>
             <div class="editor-placeholder">
-              <div class="placeholder-icon">📝</div>
+              <div class="placeholder-icon">&#x1F4DD;</div>
               <p>Select a file to edit</p>
               <p class="placeholder-hint">Open the file tree to browse your project</p>
             </div>
@@ -153,29 +153,29 @@ export const EditorScreen: Component = () => {
 function getFileIcon(filename: string): string {
   const ext = filename.split(".").pop()?.toLowerCase();
   const icons: Record<string, string> = {
-    ts: "📘",
-    tsx: "📘",
-    js: "📒",
-    jsx: "📒",
-    py: "🐍",
-    rs: "🦀",
-    go: "🐹",
-    rb: "💎",
-    java: "☕",
-    kt: "🟣",
-    html: "🌐",
-    css: "🎨",
-    json: "📋",
-    md: "📝",
-    txt: "📄",
-    yaml: "📋",
-    yml: "📋",
-    toml: "📋",
-    sh: "🐚",
-    bash: "🐚",
-    zsh: "🐚",
-    sql: "🗄️",
-    xml: "📋",
+    ts: "\u{1F4D8}",
+    tsx: "\u{1F4D8}",
+    js: "\u{1F4D2}",
+    jsx: "\u{1F4D2}",
+    py: "\u{1F40D}",
+    rs: "\u{1F980}",
+    go: "\u{1F439}",
+    rb: "\u{1F48E}",
+    java: "\u{2615}",
+    kt: "\u{1F7E3}",
+    html: "\u{1F310}",
+    css: "\u{1F3A8}",
+    json: "\u{1F4CB}",
+    md: "\u{1F4DD}",
+    txt: "\u{1F4C4}",
+    yaml: "\u{1F4CB}",
+    yml: "\u{1F4CB}",
+    toml: "\u{1F4CB}",
+    sh: "\u{1F41A}",
+    bash: "\u{1F41A}",
+    zsh: "\u{1F41A}",
+    sql: "\u{1F5C4}\uFE0F",
+    xml: "\u{1F4CB}",
   };
-  return icons[ext || ""] || "📄";
+  return icons[ext || ""] || "\u{1F4C4}";
 }

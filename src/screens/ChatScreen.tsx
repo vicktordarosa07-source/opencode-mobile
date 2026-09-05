@@ -2,21 +2,21 @@ import { Component, For, Show, createSignal, onMount, createEffect } from "solid
 import { useAppStore } from "../stores/appStore";
 
 export const ChatScreen: Component = () => {
-  const { messages, sendMessage, currentSession, currentProvider, createSession, selectSession } = useAppStore();
+  const [state, actions] = useAppStore();
   const [input, setInput] = createSignal("");
   const [loading, setLoading] = createSignal(false);
   let messagesEnd: HTMLDivElement | undefined;
 
   onMount(async () => {
-    if (!currentSession()) {
-      const session = await createSession("New Chat");
-      selectSession(session);
+    if (!state.currentSession) {
+      const session = await actions.createSession("New Chat");
+      actions.selectSession(session);
     }
   });
 
   createEffect(() => {
     // Scroll to bottom when messages change
-    if (messages().length > 0) {
+    if (state.messages.length > 0) {
       setTimeout(() => {
         messagesEnd?.scrollIntoView({ behavior: "smooth" });
       }, 100);
@@ -31,7 +31,7 @@ export const ChatScreen: Component = () => {
     setInput("");
 
     try {
-      await sendMessage(text);
+      await actions.sendMessage(text);
     } finally {
       setLoading(false);
     }
@@ -56,19 +56,19 @@ export const ChatScreen: Component = () => {
     <div class="screen chat-screen">
       <header class="screen-header">
         <div class="header-title">
-          <span class="chat-icon">💬</span>
-          <span>{currentSession()?.title || "New Chat"}</span>
+          <span class="chat-icon">&#x1F4AC;</span>
+          <span>{state.currentSession?.title || "New Chat"}</span>
         </div>
-        <Show when={currentProvider()}>
-          <span class="provider-badge">{currentProvider()!.name}</span>
+        <Show when={state.currentProvider}>
+          <span class="provider-badge">{state.currentProvider!.name}</span>
         </Show>
       </header>
 
       {/* Messages */}
       <div class="chat-messages">
-        <Show when={messages().length === 0}>
+        <Show when={state.messages.length === 0}>
           <div class="chat-empty">
-            <div class="chat-empty-icon">🤖</div>
+            <div class="chat-empty-icon">&#x1F916;</div>
             <h3>Start a conversation</h3>
             <p>Ask anything about your code</p>
             <div class="suggested-prompts">
@@ -86,11 +86,11 @@ export const ChatScreen: Component = () => {
           </div>
         </Show>
 
-        <For each={messages()}>
+        <For each={state.messages}>
           {(message) => (
             <div class={`message ${message.role}`}>
               <div class="message-avatar">
-                {message.role === "user" ? "👤" : "🤖"}
+                {message.role === "user" ? "\u{1F464}" : "\u{1F916}"}
               </div>
               <div class="message-content">
                 <div class="message-header">
@@ -111,7 +111,7 @@ export const ChatScreen: Component = () => {
 
         <Show when={loading()}>
           <div class="message assistant">
-            <div class="message-avatar">🤖</div>
+            <div class="message-avatar">{"\u{1F916}"}</div>
             <div class="message-content">
               <div class="message-body">
                 <div class="typing-indicator">

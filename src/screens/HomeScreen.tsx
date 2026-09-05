@@ -2,7 +2,7 @@ import { Component, For, Show, createSignal } from "solid-js";
 import { useAppStore } from "../stores/appStore";
 
 export const HomeScreen: Component = () => {
-  const { projects, sessions, currentProject, loadSessions, createProject, createSession, selectProject, selectSession, deleteSession, deleteProject } = useAppStore();
+  const [state, actions] = useAppStore();
   const [showNewProject, setShowNewProject] = createSignal(false);
   const [newProjectName, setNewProjectName] = createSignal("");
   const [newProjectPath, setNewProjectPath] = createSignal("");
@@ -11,15 +11,15 @@ export const HomeScreen: Component = () => {
     const name = newProjectName();
     const path = newProjectPath();
     if (!name || !path) return;
-    await createProject(name, path);
+    await actions.createProject(name, path);
     setShowNewProject(false);
     setNewProjectName("");
     setNewProjectPath("");
   };
 
   const handleNewSession = async () => {
-    const session = await createSession("New Session", currentProject()?.id);
-    selectSession(session);
+    const session = await actions.createSession("New Session", state.currentProject?.id);
+    actions.selectSession(session);
   };
 
   return (
@@ -37,13 +37,13 @@ export const HomeScreen: Component = () => {
       {/* Projects */}
       <section class="home-section">
         <h2 class="section-title">Projects</h2>
-        <Show when={projects.length > 0}>
+        <Show when={state.projects.length > 0}>
           <div class="project-list">
-            <For each={projects}>
+            <For each={state.projects}>
               {(project) => (
                 <div
-                  class={`project-card ${currentProject()?.id === project.id ? "active" : ""}`}
-                  onClick={() => selectProject(project)}
+                  class={`project-card ${state.currentProject?.id === project.id ? "active" : ""}`}
+                  onClick={() => actions.selectProject(project)}
                 >
                   <div
                     class="project-icon"
@@ -59,7 +59,7 @@ export const HomeScreen: Component = () => {
                     class="icon-button-sm"
                     onClick={(e) => {
                       e.stopPropagation();
-                      deleteProject(project.id);
+                      actions.deleteProject(project.id);
                     }}
                   >
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -72,7 +72,7 @@ export const HomeScreen: Component = () => {
             </For>
           </div>
         </Show>
-        <Show when={projects.length === 0}>
+        <Show when={state.projects.length === 0}>
           <div class="empty-state">
             <p>No projects yet</p>
             <button class="primary-button" onClick={() => setShowNewProject(true)}>
@@ -90,11 +90,11 @@ export const HomeScreen: Component = () => {
             + New
           </button>
         </div>
-        <Show when={sessions.length > 0}>
+        <Show when={state.sessions.length > 0}>
           <div class="session-list">
-            <For each={sessions.slice(0, 10)}>
+            <For each={state.sessions.slice(0, 10)}>
               {(session) => (
-                <div class="session-card" onClick={() => selectSession(session)}>
+                <div class="session-card" onClick={() => actions.selectSession(session)}>
                   <div class="session-info">
                     <span class="session-title">{session.title || "Untitled"}</span>
                     <span class="session-agent">{session.agent || "build"}</span>
@@ -106,7 +106,7 @@ export const HomeScreen: Component = () => {
                     class="icon-button-sm"
                     onClick={(e) => {
                       e.stopPropagation();
-                      deleteSession(session.id);
+                      actions.deleteSession(session.id);
                     }}
                   >
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -119,7 +119,7 @@ export const HomeScreen: Component = () => {
             </For>
           </div>
         </Show>
-        <Show when={sessions.length === 0}>
+        <Show when={state.sessions.length === 0}>
           <div class="empty-state">
             <p>No sessions yet</p>
             <button class="primary-button" onClick={handleNewSession}>
