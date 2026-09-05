@@ -39,7 +39,7 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
-          targets: aarch64-linux-android
+          target: aarch64-linux-android
           components: cargo
 
       - name: Rust cache
