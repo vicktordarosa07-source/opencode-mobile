@@ -86,7 +86,9 @@ jobs:
           head -5 Cargo.toml
 
       - name: Build APK
-        run: pnpm tauri android build --target aarch64
+        run: |
+          cargo build --release --target aarch64-linux-android -p opencode-mobile 2>&1
+          pnpm tauri android build --target aarch64
         env:
           NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/${{ env.ANDROID_NDK_VERSION }}
 
