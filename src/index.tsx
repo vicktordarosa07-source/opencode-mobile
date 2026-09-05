@@ -1,0 +1,14 @@
+/* @refresh reload */
+import { render } from "solid-js/web";
+import App from "./App";
+import "./styles/global.css";
+
+const root = document.getElementById("root");
+
+if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
+  throw new Error(
+    "Root element not found. Did you forget to add it to index.html?"
+  );
+}
+
+render(() => <App />, root!);

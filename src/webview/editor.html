@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Editor</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; width: 100%; overflow: hidden; background: #0f0f0f; }
+    #editor { height: 100%; width: 100%; }
+  </style>
+</head>
+<body>
+  <div id="editor"></div>
+  <script src="https://cdn.jsdelivr.net/npm/codemirror@6.65.7/dist/index.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/codemirror@6.65.7/dist/mode/javascript/javascript.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/codemirror@6.65.7/dist/mode/python/python.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/codemirror@6.65.7/dist/mode/rust/rust.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/codemirror@6.65.7/dist/mode/go/go.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/codemirror@6.65.7/dist/mode/xml/xml.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/codemirror@6.65.7/dist/mode/css/css.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/codemirror@6.65.7/dist/mode/htmlmixed/htmlmixed.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/codemirror@6.65.7/dist/mode/markdown/markdown.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/codemirror@6.65.7/dist/mode/yaml/yaml.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/codemirror@6.65.7/dist/mode/toml/toml.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/codemirror@6.65.7/dist/mode/sql/sql.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/codemirror@6.65.7/dist/addon/edit/matchbrackets.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/codemirror@6.65.7/dist/addon/edit/closebrackets.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/codemirror@6.65.7/dist/addon/selection/active-line.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/codemirror@6.65.7/dist/addon/search/search.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/codemirror@6.65.7/dist/addon/search/searchcursor.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/codemirror@6.65.7/dist/addon/dialog/dialog.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@6.65.7/lib/codemirror.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@6.65.7/theme/material-darker.min.css">
+  <style>
+    .CodeMirror {
+      height: 100%;
+      font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', monospace;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .CodeMirror-gutters {
+      background: #0f0f0f;
+      border-right: 1px solid #2a2a2a;
+    }
+    .CodeMirror-linenumber {
+      color: #606060;
+    }
+    .CodeMirror-cursor {
+      border-left-color: #4a9eff;
+    }
+    .CodeMirror-selected {
+      background: rgba(74, 158, 255, 0.3) !important;
+    }
+    .CodeMirror-activeline-background {
+      background: rgba(255, 255, 255, 0.03);
+    }
+    .CodeMirror-matchingbracket {
+      color: #4caf50 !important;
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div id="editor"></div>
+  <script>
+    const modeMap = {
+      'js': 'javascript',
+      'jsx': 'javascript',
+      'ts': 'javascript',
+      'tsx': 'javascript',
+      'py': 'python',
+      'rs': 'rust',
+      'go': 'go',
+      'html': 'htmlmixed',
+      'htm': 'htmlmixed',
+      'css': 'css',
+      'md': 'markdown',
+      'yaml': 'yaml',
+      'yml': 'yaml',
+      'toml': 'toml',
+      'sql': 'sql',
+      'xml': 'xml',
+      'json': 'javascript',
+    };
+
+    let editor = null;
+
+    function getMode(filename) {
+      const ext = filename.split('.').pop()?.toLowerCase();
+      return modeMap[ext] || 'null';
+    }
+
+    function initEditor(content, filename) {
+      if (editor) {
+        editor.toTextArea();
+      }
+
+      const textarea = document.createElement('textarea');
+      textarea.id = 'editor-input';
+      document.getElementById('editor').appendChild(textarea);
+
+      editor = CodeMirror.fromTextArea(textarea, {
+        theme: 'material-darker',
+        mode: getMode(filename),
+        lineNumbers: true,
+        lineWrapping: false,
+        matchBrackets: true,
+        autoCloseBrackets: true,
+        styleActiveLine: true,
+        indentUnit: 2,
+        tabSize: 2,
+        indentWithTabs: false,
+        extraKeys: {
+          'Tab': (cm) => cm.execCommand('indentMore'),
+          'Shift-Tab': (cm) => cm.execCommand('indentLess'),
+          'Ctrl-S': () => save(),
+          'Cmd-S': () => save(),
+          'Ctrl-Z': (cm) => cm.undo(),
+          'Cmd-Z': (cm) => cm.undo(),
+          'Ctrl-Shift-Z': (cm) => cm.redo(),
+          'Cmd-Shift-Z': (cm) => cm.redo(),
+        },
+      });
+
+      editor.setValue(content || '');
+      editor.clearHistory();
+
+      editor.on('change', () => {
+        window.postMessage(JSON.stringify({
+          type: 'change',
+          content: editor.getValue(),
+        }));
+      });
+
+      // Focus editor
+      editor.focus();
+    }
+
+    function save() {
+      if (editor) {
+        window.postMessage(JSON.stringify({
+          type: 'save',
+          content: editor.getValue(),
+        }));
+      }
+    }
+
+    function getContent() {
+      return editor ? editor.getValue() : '';
+    }
+
+    function setContent(content) {
+      if (editor) {
+        const cursor = editor.getCursor();
+        editor.setValue(content);
+        editor.setCursor(cursor);
+      }
+    }
+
+    function setSearch(query) {
+      if (editor) {
+        editor.setCursor({ line: 0, ch: 0 });
+        editor.search(query);
+      }
+    }
+
+    // Receive messages from Tauri
+    window.addEventListener('message', (e) => {
+      try {
+        const msg = JSON.parse(e.data);
+        switch (msg.type) {
+          case 'init':
+            initEditor(msg.content || '', msg.filename || 'untitled');
+            break;
+          case 'content':
+            setContent(msg.content);
+            break;
+          case 'search':
+            setSearch(msg.query);
+            break;
+        }
+      } catch {}
+    });
+
+    // Notify Tauri that editor is ready
+    window.postMessage(JSON.stringify({ type: 'ready' }));
+  </script>
+</body>
+</html>
