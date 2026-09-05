@@ -97,6 +97,13 @@ jobs:
           echo "=== Cargo.toml content ==="
           head -5 Cargo.toml
 
+      - name: Verify NDK toolchain
+        run: |
+          NDK_HOME="${{ env.ANDROID_HOME }}/ndk/${{ env.ANDROID_NDK_VERSION }}"
+          echo "NDK_HOME: $NDK_HOME"
+          ls -la "$NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/" | head -20
+          which aarch64-linux-android-clang || echo "clang not found in PATH"
+
       - name: Build APK
         run: |
           export NDK_HOME="${{ env.ANDROID_HOME }}/ndk/${{ env.ANDROID_NDK_VERSION }}"
