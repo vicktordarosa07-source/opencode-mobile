@@ -63,10 +63,13 @@ jobs:
       - name: Fix Tauri project structure
         run: |
           # Tauri CLI expects Cargo.toml at root for android init
-          # Our structure has it in src-tauri/, so we create a symlink
+          # Our structure has it in src-tauri/, so we create symlinks
           ln -sf src-tauri/Cargo.toml Cargo.toml
           ln -sf src-tauri/build.rs build.rs
-          ls -la Cargo.toml build.rs
+          # Verify structure
+          ls -la Cargo.toml build.rs src-tauri/Cargo.toml src-tauri/src/lib.rs
+          echo "=== Cargo.toml lib section ==="
+          grep -A3 "\[lib\]" Cargo.toml
 
       - name: Initialize Android
         run: pnpm tauri android init
