@@ -41,6 +41,9 @@ jobs:
           toolchain: stable
           targets: aarch64-linux-android
 
+      - name: Add cargo to PATH
+        run: echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
       - name: Rust cache
         uses: swatinem/rust-cache@v2
         with:
