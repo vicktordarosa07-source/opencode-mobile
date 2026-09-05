@@ -117,7 +117,7 @@ jobs:
         if: success()
         with:
           name: opencode-mobile-apk
-          path: src-tauri/gen/android/app/build/outputs/apk/**/*.apk
+          path: gen/android/app/build/outputs/apk/**/*.apk
           retention-days: 30
 
       - name: Upload AAB
@@ -125,5 +125,5 @@ jobs:
         if: success()
         with:
           name: opencode-mobile-aab
-          path: src-tauri/gen/android/app/build/outputs/bundle/**/*.aab
+          path: gen/android/app/build/outputs/bundle/**/*.aab
           retention-days: 30
