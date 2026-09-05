@@ -99,13 +99,11 @@ jobs:
 
       - name: Build APK
         run: |
+          export NDK_HOME="${{ env.ANDROID_HOME }}/ndk/${{ env.ANDROID_NDK_VERSION }}"
+          export ANDROID_NDK_ROOT="${{ env.ANDROID_HOME }}/ndk/${{ env.ANDROID_NDK_VERSION }}"
+          export CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER=aarch64-linux-android-clang
           cargo build --release --manifest-path src-tauri/Cargo.toml --target aarch64-linux-android 2>&1
           pnpm tauri android build --target aarch64
-        env:
-          NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/${{ env.ANDROID_NDK_VERSION }}
-          ANDROID_NDK_ROOT: ${{ env.ANDROID_HOME }}/ndk/${{ env.ANDROID_NDK_VERSION }}
-          PATH: ${{ env.ANDROID_HOME }}/ndk/${{ env.ANDROID_NDK_VERSION }}/toolchains/llvm/prebuilt/linux-x86_64:${{ env.PATH }}
-          CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER: aarch64-linux-android-clang
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
