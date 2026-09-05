@@ -1,0 +1,2 @@
+[build]
+rustflags = ["-C", "link-arg=-shared", "-C", "link-arg=-soname,libopencode_mobile_lib.so"]
