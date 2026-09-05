@@ -35,6 +35,12 @@ jobs:
         with:
           version: 9
 
+      - name: Install build dependencies
+        run: sudo apt-get update && sudo apt-get install -y build-essential pkg-config libssl-dev gcc
+
+      - name: Verify cc linker
+        run: which cc && cc --version
+
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
         with:
@@ -48,9 +54,6 @@ jobs:
         uses: swatinem/rust-cache@v2
         with:
           workspaces: src-tauri
-
-      - name: Install build dependencies
-        run: sudo apt-get update && sudo apt-get install -y build-essential pkg-config libssl-dev
 
       - name: Setup Java
         uses: actions/setup-java@v4
