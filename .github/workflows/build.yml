@@ -54,7 +54,7 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
         with:
-          accept_android_sdk_licenses: true
+          log-accepted-android-sdk-licenses: "true"
 
       - name: Install Android NDK
         run: sdkmanager "ndk;${{ env.ANDROID_NDK_VERSION }}"
