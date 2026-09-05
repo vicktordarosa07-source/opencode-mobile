@@ -86,11 +86,7 @@ jobs:
           head -5 Cargo.toml
 
       - name: Build APK
-        run: |
-          # tauri::generate_context!() looks for frontendDist relative to src-tauri/
-          ln -sf ../dist src-tauri/dist
-          ls -la src-tauri/dist/
-          pnpm tauri android build --target aarch64
+        run: pnpm tauri android build --target aarch64
         env:
           NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/${{ env.ANDROID_NDK_VERSION }}
 
