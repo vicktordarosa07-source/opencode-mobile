@@ -60,8 +60,27 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Fix Tauri project structure
+        run: |
+          # Tauri CLI expects Cargo.toml at root for android init
+          # Our structure has it in src-tauri/, so we create a symlink
+          ln -sf src-tauri/Cargo.toml Cargo.toml
+          ln -sf src-tauri/build.rs build.rs
+          ls -la Cargo.toml build.rs
+
       - name: Initialize Android
         run: pnpm tauri android init
+
+      - name: Verify project structure
+        run: |
+          echo "=== Project root ==="
+          ls -la
+          echo ""
+          echo "=== src-tauri ==="
+          ls -la src-tauri/
+          echo ""
+          echo "=== Cargo.toml content ==="
+          head -5 Cargo.toml
 
       - name: Build APK
         run: pnpm tauri android build --target aarch64

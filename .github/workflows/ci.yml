@@ -59,6 +59,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Fix Tauri project structure
+        run: |
+          ln -sf src-tauri/Cargo.toml Cargo.toml
+          ln -sf src-tauri/build.rs build.rs
+
       - name: Initialize Android
         run: pnpm tauri android init
 
