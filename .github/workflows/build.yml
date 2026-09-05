@@ -43,6 +43,9 @@ jobs:
       - name: Install cargo
         run: rustup component add cargo
 
+      - name: Add android target
+        run: rustup target add aarch64-linux-android
+
       - name: Rust cache
         uses: swatinem/rust-cache@v2
         with:
