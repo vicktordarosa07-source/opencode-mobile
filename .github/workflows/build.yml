@@ -38,16 +38,10 @@ jobs:
       - name: Setup Rust
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: stable
+          toolchain-file: rust-toolchain
 
-      - name: Add android target
+      - name: Add Android target
         run: rustup target add aarch64-linux-android
-
-      - name: Install cargo for android
-        run: rustup component add cargo --target aarch64-linux-android
-
-      - name: Verify cargo
-        run: cargo --version
 
       - name: Rust cache
         uses: swatinem/rust-cache@v2
