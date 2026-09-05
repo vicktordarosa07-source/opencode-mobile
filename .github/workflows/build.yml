@@ -39,6 +39,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: aarch64-linux-android
+          components: cargo
 
       - name: Install cargo
         run: rustup component add cargo
