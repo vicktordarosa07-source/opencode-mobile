@@ -36,12 +36,10 @@ jobs:
           version: 9
 
       - name: Setup Rust
-        uses: actions-rs/toolchain@v1
+        uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain-file: rust-toolchain
-
-      - name: Add Android target
-        run: rustup target add aarch64-linux-android
+          toolchain: stable
+          targets: aarch64-linux-android
 
       - name: Rust cache
         uses: swatinem/rust-cache@v2
