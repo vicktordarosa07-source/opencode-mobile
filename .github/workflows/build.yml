@@ -36,18 +36,16 @@ jobs:
           version: 9
 
       - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
+        uses: actions-rs/toolchain@v1
         with:
+          toolchain: stable
           targets: aarch64-linux-android
           components: cargo
 
-      - name: Install cargo
-        run: rustup component add cargo
+      - name: Verify cargo
+        run: cargo --version
 
       - name: Rust cache
-        uses: swatinem/rust-cache@v2
-        with:
-          workspaces: src-tauri
 
       - name: Setup Java
         uses: actions/setup-java@v4
