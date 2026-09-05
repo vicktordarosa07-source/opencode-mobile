@@ -37,8 +37,9 @@ jobs:
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: aarch64-linux-android
+
+      - name: Add android target
+        run: rustup target add aarch64-linux-android
 
       - name: Install cargo for android target
         run: rustup component add cargo --target aarch64-linux-android
