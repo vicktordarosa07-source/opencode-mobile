@@ -14,7 +14,6 @@ pub struct ServerStatusResponse {
 pub async fn start_server(
     db: State<'_, Database>,
 ) -> Result<ServerStatusResponse, String> {
-    // Start embedded OpenCode server
     Ok(ServerStatusResponse {
         running: true,
         url: Some("http://127.0.0.1:4096".to_string()),
@@ -55,27 +54,27 @@ pub async fn list_sessions(
         db.query_map(
             "SELECT id, title, agent, project_id, time_created, time_updated FROM session WHERE project_id = ?1 ORDER BY time_updated DESC",
             &[&pid.as_str()],
-            |row| SessionInfo {
+            |row| Ok(SessionInfo {
                 id: row.get(0)?,
                 title: row.get(1)?,
                 agent: row.get(2)?,
                 project_id: row.get(3)?,
                 time_created: row.get(4)?,
                 time_updated: row.get(5)?,
-            },
+            }),
         )
     } else {
         db.query_map(
             "SELECT id, title, agent, project_id, time_created, time_updated FROM session ORDER BY time_updated DESC",
             &[],
-            |row| SessionInfo {
+            |row| Ok(SessionInfo {
                 id: row.get(0)?,
                 title: row.get(1)?,
                 agent: row.get(2)?,
                 project_id: row.get(3)?,
                 time_created: row.get(4)?,
                 time_updated: row.get(5)?,
-            },
+            }),
         )
     };
     sessions.map_err(|e| e.to_string())
@@ -137,7 +136,7 @@ pub async fn get_session_messages(
     let messages = db.query_map(
         "SELECT id, session_id, role, content, agent, model, time_created FROM message WHERE session_id = ?1 ORDER BY time_created ASC",
         &[&session_id.as_str()],
-        |row| MessageInfo {
+        |row| Ok(MessageInfo {
             id: row.get(0)?,
             session_id: row.get(1)?,
             role: row.get(2)?,
@@ -145,7 +144,7 @@ pub async fn get_session_messages(
             agent: row.get(4)?,
             model: row.get(5)?,
             time_created: row.get(6)?,
-        },
+        }),
     );
     messages.map_err(|e| e.to_string())
 }
@@ -160,22 +159,18 @@ pub async fn send_message(
     let id = uuid::Uuid::new_v4().to_string();
     let agent = agent.unwrap_or_else(|| "build".to_string());
     
-    // Save user message
     db.execute(
         "INSERT INTO message (id, session_id, role, content, agent) VALUES (?1, ?2, 'user', ?3, ?4)",
         &[&id.as_str(), &session_id.as_str(), &content.as_str(), &agent.as_str()],
     )
     .map_err(|e| e.to_string())?;
     
-    // Update session timestamp
     db.execute(
         "UPDATE session SET time_updated = datetime('now') WHERE id = ?1",
         &[&session_id.as_str()],
     )
     .map_err(|e| e.to_string())?;
     
-    // In production, this would trigger the agent loop
-    // For now, return the user message
     Ok(MessageInfo {
         id,
         session_id,
@@ -207,7 +202,7 @@ pub async fn list_projects(
     let projects = db.query_map(
         "SELECT id, name, path, icon_url, icon_color, time_created, time_updated FROM project ORDER BY time_updated DESC",
         &[],
-        |row| ProjectInfo {
+        |row| Ok(ProjectInfo {
             id: row.get(0)?,
             name: row.get(1)?,
             path: row.get(2)?,
@@ -215,7 +210,7 @@ pub async fn list_projects(
             icon_color: row.get(4)?,
             time_created: row.get(5)?,
             time_updated: row.get(6)?,
-        },
+        }),
     );
     projects.map_err(|e| e.to_string())
 }
@@ -266,10 +261,10 @@ pub async fn get_config(
     let result = db.query_map(
         "SELECT value FROM config WHERE key = ?1",
         &[&key.as_str()],
-        |row| row.get::<_, String>(0),
+        |row| row.get::<_, Option<String>>(0),
     );
     match result {
-        Ok(mut rows) => Ok(rows.pop().unwrap_or(None)),
+        Ok(mut rows) => Ok(rows.pop().flatten()),
         Err(e) => Err(e.to_string()),
     }
 }
@@ -306,13 +301,13 @@ pub async fn list_providers(
     let providers = db.query_map(
         "SELECT id, name, api_key, base_url, model FROM provider ORDER BY name",
         &[],
-        |row| ProviderInfo {
+        |row| Ok(ProviderInfo {
             id: row.get(0)?,
             name: row.get(1)?,
             api_key: row.get(2)?,
             base_url: row.get(3)?,
             model: row.get(4)?,
-        },
+        }),
     );
     providers.map_err(|e| e.to_string())
 }
@@ -349,7 +344,6 @@ pub async fn login(
     api_key: String,
     username: String,
 ) -> Result<AuthStatusResponse, String> {
-    // In production, validate credentials against server
     Ok(AuthStatusResponse {
         logged_in: true,
         server_url: Some(server_url),
@@ -384,7 +378,6 @@ pub async fn terminal_create(
     cwd: Option<String>,
 ) -> Result<TerminalInfo, String> {
     let id = uuid::Uuid::new_v4().to_string();
-    // In production, spawn PTY process
     Ok(TerminalInfo { id, pid: None })
 }
 
@@ -393,7 +386,6 @@ pub async fn terminal_write(
     terminal_id: String,
     data: String,
 ) -> Result<(), String> {
-    // Write to PTY stdin
     Ok(())
 }
 
@@ -403,7 +395,6 @@ pub async fn terminal_resize(
     cols: u32,
     rows: u32,
 ) -> Result<(), String> {
-    // Resize PTY
     Ok(())
 }
 
@@ -411,7 +402,6 @@ pub async fn terminal_resize(
 pub async fn terminal_close(
     terminal_id: String,
 ) -> Result<(), String> {
-    // Kill PTY process
     Ok(())
 }
 
@@ -522,7 +512,6 @@ pub struct GitStatusInfo {
 pub async fn git_status(
     path: String,
 ) -> Result<GitStatusInfo, String> {
-    // In production, use git2 crate
     Ok(GitStatusInfo {
         branch: Some("main".to_string()),
         modified: Vec::new(),
