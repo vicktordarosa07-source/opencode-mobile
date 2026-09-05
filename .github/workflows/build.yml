@@ -66,10 +66,10 @@ jobs:
           # Our structure has it in src-tauri/, so we create symlinks
           ln -sf src-tauri/Cargo.toml Cargo.toml
           ln -sf src-tauri/build.rs build.rs
+          # tauri-build expects tauri.conf.json in src-tauri/
+          ln -sf ../tauri.conf.json src-tauri/tauri.conf.json
           # Verify structure
-          ls -la Cargo.toml build.rs src-tauri/Cargo.toml src-tauri/src/lib.rs
-          echo "=== Cargo.toml lib section ==="
-          grep -A3 "\[lib\]" Cargo.toml
+          ls -la Cargo.toml build.rs src-tauri/tauri.conf.json src-tauri/Cargo.toml src-tauri/src/lib.rs
 
       - name: Initialize Android
         run: pnpm tauri android init

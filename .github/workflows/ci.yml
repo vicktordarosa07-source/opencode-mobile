@@ -63,6 +63,7 @@ jobs:
         run: |
           ln -sf src-tauri/Cargo.toml Cargo.toml
           ln -sf src-tauri/build.rs build.rs
+          ln -sf ../tauri.conf.json src-tauri/tauri.conf.json
 
       - name: Initialize Android
         run: pnpm tauri android init
