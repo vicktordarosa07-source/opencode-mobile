@@ -39,9 +39,10 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: aarch64-linux-android
+          toolchain: stable
 
       - name: Install cargo for android target
-        run: rustup component add cargo --target aarch64-linux-android
+        run: rustup target add aarch64-linux-android
 
       - name: Rust cache
         uses: swatinem/rust-cache@v2
